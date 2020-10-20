@@ -4,11 +4,10 @@ class User < ApplicationRecord
     has_secure_password
 
     validates :email, uniqueness:true, presence:true
-    validates :password, presence:true
+    validates :password_digest, presence:true
 
     def generate_password_token!
         token = generate_token
-        puts()
         self.reset_password_token = token
         self.reset_password_sent_at = Time.now.utc
         save!

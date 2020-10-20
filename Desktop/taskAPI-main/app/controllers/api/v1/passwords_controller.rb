@@ -1,18 +1,23 @@
 class Api::V1::PasswordsController < ApplicationController
-    before_action :authorized, except: [:forgot, :reset, :update]
+    before_action :authorized, only: [:update], except: [:forgot, :reset]
+
     def forgot
         if params[:email].blank?
-            return render json: {error: 'Email not present'}
+            return render json: {error: 'Email not present'}, status: 400
         end
     
         user = User.find_by(email: params[:email].downcase)
     
         if user.present?
             token = user.generate_password_token!
-            ApplicationMailer.send_email(@user, "token", "Hi #{user.username}\nUse this token to reset password#{token}").deliver_now
-            render json: {status: 'ok'}, status: :ok
+            subject = "Password Reset Token"
+            body = "use the token: #{token} to reset your password"
+
+            ApplicationMailer.send_email(user, subject, body).deliver_now
+
+            render json: {status: 'token has been sent to your email'}, status: 200
         else
-            render json: {error: ['Email address not found. Please check and try again.']}, status: :not_found
+            render json: {error: 'Email address not found. Please check and try aain.'}, status: 404
         end
     end
 
@@ -27,26 +32,32 @@ class Api::V1::PasswordsController < ApplicationController
     
         if user.present? && user.password_token_valid?
             if user.reset_password!(params[:password])
-                render json: {status: 'ok'}, status: :ok
+                render json: {status: 'password reset successfully'}, status: 200
             else
                 render json: {error: user.errors.full_messages}, status: :unprocessable_entity
             end
         else
-            render json: {error:  ['Link not valid or expired. Try generating a new link.']}, status: :not_found
+            render json: {error:  ['Link not valid or expired. Try generating a new link.']}, status: 404
         end
     end
 
     def update
-        if !params[:password].present?
-            render json: {error: 'Password not present'}, status: :unprocessable_entity
-            return
-        end
-      
-        if current_user.reset_password(params[:password])
-            render json: {status: 'ok'}, status: :ok
+        user = User.find_by(email: params[:email])
+        if user
+            if !params[:password].present?
+                render json: {error: 'Password not present'}, status: :unprocessable_entity
+                return
+            end
+          
+            if user.reset_password(params[:password])
+                render json: {status: 'password updated successfully'}, status: 200
+            else
+                render json: {errors: user.errors.full_messages}, status: :unprocessable_entity
+            end
         else
-            render json: {errors: current_user.errors.full_messages}, status: :unprocessable_entity
+            render json: {error: 'Email does not match'}, status:400
         end
+        
     end
       
     
