@@ -2,18 +2,19 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do 
       #task routes
-      get "/tasks", to: "tasks#index"
-      post "/tasks", to: "tasks#create"
-      get "/tasks/:id", to: "tasks#show"
-      patch "/tasks/:id", to: "tasks#update"
-      delete "/tasks/:id", to: "tasks#destroy"
-      get "/complete", to: "tasks#complete"
-      get "/incomplete", to: "tasks#incomplete"
+      
+      post "/users/:user_id/tasks", to: "tasks#create"
+      get "/users/:user_id/tasks", to: "tasks#show"
+      patch "/users/:user_id/tasks/:id", to: "tasks#update"
+      delete "/users/:user_id/tasks/:id", to: "tasks#destroy"
+      get "/users/:user_id/tasks/complete", to: "tasks#complete"
+      get "/users/:user_id/tasks/incomplete", to: "tasks#incomplete"
+
       #user routes
       get "/users", to: "users#index"
-      post "/users", to: "users#sign_up"
+      post "/users/sign_up", to: "users#sign_up"
       post "/users/login", to: "users#login"
-      patch "/users/:id", to: "users#update"
+      patch "/users/update", to: "users#update"
       delete "/users/:id", to: "users#destroy"
 
       #password routes

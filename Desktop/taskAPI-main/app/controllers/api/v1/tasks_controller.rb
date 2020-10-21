@@ -1,16 +1,11 @@
 class Api::V1::TasksController < ApplicationController
  
-    before_action :find_task, only: [:show, :update, :destroy]
+    before_action :find_task, only: [ :update, :destroy]
     before_action :authorized, only: [:show, :update, :create, :destroy, :complete, :incomplete]
-
-        
-    def index
-        @tasks = Task.all
-        render json: @tasks, status: 200
-    end
-
+    
     def show
-            render json: @task            
+        @tasks = Task.where(user_id: params[:user_id])
+        render json: @tasks
     end
 
     def create
@@ -25,7 +20,7 @@ class Api::V1::TasksController < ApplicationController
     def update
         if @task
             @task.update(task_params)
-            render json: { message: 'Task updated successfully'}, status: 200
+            render json:  @task, status: 200
         else
             render json: { error: 'Unable to update the task'}, status: 400
         end

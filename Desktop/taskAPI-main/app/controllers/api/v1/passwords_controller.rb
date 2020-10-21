@@ -1,4 +1,5 @@
 class Api::V1::PasswordsController < ApplicationController
+
     before_action :authorized, only: [:update], except: [:forgot, :reset]
 
     def forgot
@@ -25,7 +26,7 @@ class Api::V1::PasswordsController < ApplicationController
         token = params[:token].to_s
         
         if params[:email].blank?
-            return render json: {error: 'Token not present'}
+            return render json: {error: 'email not found'}
         end
     
         user = User.find_by(reset_password_token: token)
@@ -37,7 +38,7 @@ class Api::V1::PasswordsController < ApplicationController
                 render json: {error: user.errors.full_messages}, status: :unprocessable_entity
             end
         else
-            render json: {error:  ['Link not valid or expired. Try generating a new link.']}, status: 404
+            render json: {error:  'Link not valid or expired. Try generating a new link.'}, status: 404
         end
     end
 
